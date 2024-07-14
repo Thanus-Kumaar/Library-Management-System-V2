@@ -1,7 +1,7 @@
 <template>
   <nav
-    class="navbar navbar-expand-lg"
-    style="background-color: rgb(30, 30, 30)"
+    class="navbar navbar-expand-lg mx-auto px-4 mt-3"
+    style="background-color: rgba(30, 30, 30, 0.6); width: 60%; border-radius: 8px;"
   >
     <div class="container-fluid">
       <a class="navbar-brand text-light" href="#">Library Management System V2</a>
