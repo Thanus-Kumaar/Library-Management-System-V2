@@ -75,6 +75,12 @@ export default {
         })
         .then((response) => {
           console.log(response);
+          if (response.status == 200){
+            localStorage.setItem('role', response.data.Role)
+            if (response.data.Role == 1){
+              this.$router.push('/adminHome')
+            }
+          }
         });
       } else {
         axios
@@ -87,6 +93,8 @@ export default {
           console.log(response);
           if (response.status == 200){
             this.flagToChangeAdmin = false
+            this.uname == ""
+            this.password == ""
           }
         });
       }

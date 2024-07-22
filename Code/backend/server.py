@@ -24,9 +24,15 @@ def addUser():
   try:
     with sqlite3.connect("library.db") as con:
       cur = con.cursor()
-      cur.execute("INSERT INTO user VALUES(?,?,?)",(username,password,int(isAdmin)))
-      print("User added successfully !")
-      return jsonify({"SUCCESS":"User created successfully!"}), 200
+      cur.execute("SELECT * FROM user WHERE uname = ? AND password = ?",(username, password))
+      user = cur.fetchall()
+      print("#####",user)
+      if(user==None or user==""):
+        cur.execute("INSERT INTO user VALUES(?,?,?)",(username,password,int(isAdmin)))
+        print("User added successfully !")
+        return jsonify({"SUCCESS":"User created successfully!"}), 200
+      else:
+        return jsonify({"ERROR":"User Already Exists"}), 400
   except Exception as e:
     print("Error while adding data in database",e)
   return jsonify({"ERROR":"User Already Exists"}), 400
@@ -48,12 +54,12 @@ def loginUser():
       session['user'] = username
       session['role'] = role
       if(role == 1):
-        return redirect("/adminHome")
+        return jsonify({"MSG":"Successful Login", "Name":username, "Role": role})
       elif(role==0):
-        return redirect("/userHome")
+        return jsonify({"MSG":"Successful Login", "Name":username, "Role": role})
   except Exception as e:
     print("User data not found in database",str(e)), 400
-  return redirect("/login")
+  return jsonify({"ERROR":"Login Failed!"})
 
 @app.route("/adminHome",methods=['GET'])
 def adminHome():
