@@ -1,0 +1,68 @@
+<template>
+  <div>
+    <div class="d-flex flex-row p-4" style="margin-top: 10%;">
+      <div class="d-flex flex-grow-1">
+        <div class="mx-auto">
+          <span class="display-2">Welcome {{ name }}</span>
+          <span class="display-6 d-block">Library Management System</span>
+        </div>
+      </div>
+      <div class="d-flex flex-fill">
+        <div class="d-flex flex-column mx-auto row-gap-3">
+          <button class="btn btn-light" type="button" @click="navigate('/readBooks')">Read Books</button>
+          <button class="btn btn-light" type="button" @click="navigate('/userBooks')">Request / Return books</button>
+          <button class="btn btn-light" type="button" @click="navigate('/searchBooks')">Search Books</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" tabindex="-1" id="UsersModal" aria-labelledby="UsersModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Users</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-primary table-hover table-bordered table-responsive">
+              <thead class="table-dark">
+                <tr>
+                  <th>User Name</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(user, index) in userData" :key="index">
+                  <td>{{ user.username }}</td>
+                  <td>{{ user.role }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      name: 'User', // Placeholder, replace with actual data
+      userData: [
+        { username: 'John Doe', role: 'Member' },
+        { username: 'Jane Smith', role: 'Librarian' },
+        // Add more user data as needed
+      ],
+      currentPath: window.location.pathname // Tracks the current path for active class
+    };
+  },
+  methods: {
+    navigate(path) {
+      window.location.href = path;
+    }
+  }
+};
+</script>
