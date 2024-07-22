@@ -1,7 +1,7 @@
 <template>
-  <div class="d-flex flex-row" style="padding-left: 50px; padding-right: 50px; margin-top: 80px;">
-    <div class="mt-4" style="padding-left: 50px; padding-right: 50px; width: 70%; height: fit-content;">
-      <div class="text-light" style="font-size: 50px">
+  <div class="d-flex flex-column flex-lg-row" style="margin-top: 80px;">
+    <div class="mt-4" style="width: 70%; height: fit-content;">
+      <div class="text-light " style="font-size: 50px">
         Library Management System
       </div>
       <div class="text-light mt-4">
@@ -10,6 +10,11 @@
         the process of borrowing, returning, and managing books, making it easy
         for both librarians and patrons to stay organized.
       </div>
+      <a href="">
+        <button class="btn btn-secondary mt-4">
+          Sign In to continue
+        </button>
+      </a>
     </div>
     <div
       class="d-flex flex-row flex-wrap justify-content-evenly"
@@ -20,8 +25,8 @@
         style="width: 250px"
         v-for="feature in features"
       >
-        <div class="h5 fst-italic fw-semibold">{{ feature.title }}</div>
-        <div style="font-size: 13px;">{{ feature.desc }}</div>
+        <div class="h5 fst-italic fw-semibold" style="color: black;">{{ feature.title }}</div>
+        <div style="font-size: 14px; color: black;">{{ feature.desc }}</div>
       </div>
     </div>
   </div>

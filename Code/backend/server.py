@@ -1,38 +1,23 @@
 import sqlite3,os,re
 from datetime import datetime, timedelta
 from flask import *
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
 app.secret_key = "asdlkjqwepoirtyiuyzxc,mncvbnbv0912398735=-0`12"
 abs = os.path.abspath(__file__)
 uploadPath = abs[0:-9]+"uploads"
 app.config['UPLOAD_FOLDER'] = uploadPath
 
-@app.route('/')
-def home():
-  return redirect('/login')
-
-@app.route('/login',methods=['GET'])
-def login():
-  return render_template("login.html")
-
-@app.route('/logOut',methods=['GET'])
-def logOut():
-  session['user']=None
-  session['role']=None
-  return redirect('/login')
-
-@app.route('/signUp',methods=['GET','POST'])
-def signUp():
-  return render_template("signUp.html")
-
 @app.route('/addUser',methods=['POST'])
 def addUser():
-  username = request.form["userName"]
-  password = request.form["password"]
-  isAdmin = request.form.get("isAdmin")
+  data = request.json
+  username = data.get("userName")
+  password = data.get("password")
+  isAdmin = int(data.get("isAdmin"))
   regex = r"^[a-zA-Z0-9]{8,}$"
   if(username=="" or password=="" or not re.match(regex,password)):
-    return jsonify({"BAD_REQUEST":"Invalid credentials!"})
+    return jsonify({"BAD_REQUEST":"Invalid credentials!"}), 400
   if(isAdmin==None):
     isAdmin="0"
   print(username,password,isAdmin)
@@ -41,17 +26,18 @@ def addUser():
       cur = con.cursor()
       cur.execute("INSERT INTO user VALUES(?,?,?)",(username,password,int(isAdmin)))
       print("User added successfully !")
-      return jsonify({"SUCCESS":"User created successfully!"})
+      return jsonify({"SUCCESS":"User created successfully!"}), 200
   except Exception as e:
     print("Error while adding data in database",e)
-  return jsonify({"ERROR":"User Already Exists"})
+  return jsonify({"ERROR":"User Already Exists"}), 400
 
 @app.route("/loginUser",methods=['POST'])
 def loginUser():
-  username = request.form.get("userName")
-  password = request.form.get("password")
+  data = request.json
+  username = data.get("userName")
+  password = data.get("password")
   if(username=="" or password==""):
-    return jsonify({"BAD_REQUEST":"Invalid credentials!"})
+    return jsonify({"BAD_REQUEST":"Invalid credentials!"}), 400
   print(username,password)
   try:
     with sqlite3.connect("library.db") as con:
@@ -66,7 +52,7 @@ def loginUser():
       elif(role==0):
         return redirect("/userHome")
   except Exception as e:
-    print("User data not found in database",str(e))
+    print("User data not found in database",str(e)), 400
   return redirect("/login")
 
 @app.route("/adminHome",methods=['GET'])
