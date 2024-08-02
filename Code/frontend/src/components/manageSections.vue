@@ -189,7 +189,7 @@ export default {
         await axios.put('http://127.0.0.1:5000/manageSections', this.sectionToEdit);
         this.hideModal('editSection');
         this.sectionToEdit = { id: '', name: '', description: '' };
-        this.fetchSections(); // Reload sections
+        this.fetchSections();
       } catch (error) {
         alert('Error editing section');
       }
@@ -201,7 +201,7 @@ export default {
         });
         this.hideModal('deleteSection');
         this.sectionToDelete = { id: '' };
-        this.fetchSections(); // Reload sections
+        this.fetchSections();
       } catch (error) {
         alert('Error deleting section');
       }

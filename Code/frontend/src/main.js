@@ -10,6 +10,7 @@ import UserHome from "./components/userHome.vue";
 import ReadBooks from "./components/readBooks.vue";
 import ManageSections from "./components/manageSections.vue";
 import ManageBooks from "./components/manageBooks.vue";
+import SearchBooks from "./components/searchBooks.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -28,4 +29,5 @@ app.component("UserHome", UserHome)
 app.component("ReadBooks", ReadBooks)
 app.component("ManageSections",ManageSections)
 app.component("ManageBooks",ManageBooks)
+app.component("SearchBooks", SearchBooks)
 app.mount("#app");

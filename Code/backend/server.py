@@ -225,30 +225,21 @@ def manageBooks():
         print("Unable to delete data:", str(e))
         return jsonify({"Error": "Internal Server Error"}), 500
   
-@app.route('/searchBooks',methods=['GET','POST'])
+@app.route('/searchBooks',methods=['POST'])
 def searchBooks():
-  if(request.method == 'GET'):
-    try:
-      with sqlite3.connect("library.db") as con:
-        cur = con.cursor()
-        cur.execute("SELECT b.id,b.name,b.author,s.name FROM Book b, Section s WHERE s.id = b.sectionID")
-        data = cur.fetchall()
-        print(data)
-      return render_template("searchBooks.html",books=data)
-    except Exception as e:
-      print("Internal Server Error: ",e)
-  elif request.method == 'POST':
-    try:
-      with sqlite3.connect("library.db") as con:
-        cur = con.cursor()
-        book_search = '%' + request.form['bookSearch'] + '%'
-        author_search = '%' + request.form['authorSearch'] + '%'
-        cur.execute("SELECT b.id,b.name,b.author,s.name FROM Book as b JOIN Section as s ON s.id = b.sectionID WHERE b.name LIKE ? AND b.author LIKE ?",(book_search,author_search))
-        data = cur.fetchall()
-        print(data)
-        return render_template("searchBooks.html",books=data)
-    except Exception as e:
-      print("Internal Server Error: ",e)
+  data = request.json
+  print(data)
+  try:
+    with sqlite3.connect("library.db") as con:
+      cur = con.cursor()
+      book_search = '%' + data['bookSearch'] + '%'
+      author_search = '%' + data['authorSearch'] + '%'
+      cur.execute("SELECT b.id,b.name,b.author,s.name FROM Book as b JOIN Section as s ON s.id = b.sectionID WHERE b.name LIKE ? AND b.author LIKE ?",(book_search,author_search))
+      data = cur.fetchall()
+      print(data)
+      return jsonify({"data":data}), 200
+  except Exception as e:
+    return jsonify({"Error": "Internal Server Error"}), 500
 
 @app.route('/userHome',methods=["GET"])
 def userHome():
