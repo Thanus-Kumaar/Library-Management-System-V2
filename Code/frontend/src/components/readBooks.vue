@@ -59,7 +59,7 @@ export default {
     axios.get("http://127.0.0.1:5000/readBooks").then((response) => {
       if(response.status == 200){
         console.log(response.data)
-        books = response.data
+        books = response.data.books
       }
     });
   },

@@ -83,41 +83,54 @@ def manageSections():
         cur.execute("SELECT * FROM section")
         sections = cur.fetchall()
         print(sections)
-        return render_template("sections.html",sections=sections)
+        return jsonify({"sections":sections}), 200
     except Exception as e:
       print("User data not found in database",str(e))
+      return jsonify({"Error":"Internal Server Error"}), 500
   elif request.method == 'POST':
     currDate = datetime.now().date()
     print(currDate)
+    data = request.json
+    section_name = data.get('name')
+    description = data.get('description')
     try:
       with sqlite3.connect("library.db") as con:
         cur = con.cursor()
-        cur.execute("INSERT INTO section(name,creationDate,description) VALUES(?,?,?)",(request.form['sectionName'],currDate,request.form['description']))
+        cur.execute("INSERT INTO section(name,creationDate,description) VALUES(?,?,?)",(section_name,currDate,description))
         sections = cur.fetchall()
         print(sections)
-        return redirect('/manageSections')
+        return jsonify({"SUCCESS ":"Section added successfully"}), 200
     except Exception as e:
       print("User data not found in database",str(e))
+      return jsonify({"Error":"Internal Server Error"}), 500
   elif request.method == 'DELETE':
     try:
+      secID = request.args.get('secID')
+      if secID == None:
+        return jsonify({"ERR":"SectionID is not found!"})
+      else:
+        secID = int(secID)
       with sqlite3.connect("library.db") as con:
         cur = con.cursor()
-        cur.execute("DELETE FROM book WHERE sectionID = ?",(request.args.get('secID')))
-        cur.execute("DELETE FROM section WHERE id = ?",(request.args.get('secID')))
+        cur.execute("DELETE FROM book WHERE sectionID = ?",(secID,))
+        cur.execute("DELETE FROM section WHERE id = ?",(secID,))
+        return jsonify({"SUCCESS":"Successfully deleted the entry!"}),200
     except Exception as e:
       print("Unable to delete data: ",str(e))
-    return redirect('/manageSections')
+      return jsonify({"Error":"Internal Server Error"}), 500
   elif request.method == 'PUT':
     currDate = datetime.now().date()
-    data = request.get_json()
-    print("****************",data)
+    data = request.json
+    section_id = data.get('id')
+    section_name = data.get('name')
+    description = data.get('description')
     try:
       with sqlite3.connect("library.db") as con:
         cur = con.cursor()
-        cur.execute("UPDATE section SET name=?, creationDate=?, description=? WHERE id=?",(data['name'],currDate,data['desc'],int(data['id'])))
-        return redirect('/manageSections')
+        cur.execute("UPDATE section SET name=?, creationDate=?, description=? WHERE id=?",(section_name,currDate,description,int(section_id)))
+        return jsonify({"SUCCESS":"Updated section successfully!"}), 200
     except Exception as e:
-      print("User data not found in database",str(e))
+      return jsonify({"Error":"Internal Server Error"}), 500
 
 @app.route('/manageBooks',methods=['GET','POST','PUT','DELETE'])
 def manageBooks():
