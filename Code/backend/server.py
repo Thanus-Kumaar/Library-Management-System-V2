@@ -302,10 +302,10 @@ def readBooks():
       cur = con.cursor()
       cur.execute("SELECT b.name, b.author, s.name FROM book b JOIN section s ON b.sectionID = s.id WHERE b.id IN (SELECT bookid FROM borrowed WHERE uname = ? AND status = 1)",(session.get('user'),))
       data = cur.fetchall()
-      return render_template('readBooks.html', books = data)
+      return jsonify({"books":data}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
-  return "Error"
+    return jsonify({"Error":"Internal Server Error"}), 500
 
 @app.route('/view-file')
 def view_file():

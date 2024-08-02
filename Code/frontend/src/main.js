@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar.vue";
 import Login from "./components/LoginPage.vue";
 import AdminHome from "./components/adminHome.vue";
 import UserHome from "./components/userHome.vue";
+import ReadBooks from "./components/readBooks.vue";
 
 
 const router = createRouter({
@@ -23,4 +24,5 @@ app.component("Navbar", Navbar)
 app.component("Login", Login)
 app.component("AdminHome", AdminHome)
 app.component("UserHome", UserHome)
+app.component("ReadBooks", ReadBooks)
 app.mount("#app");
