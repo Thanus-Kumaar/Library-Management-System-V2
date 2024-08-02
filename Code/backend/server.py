@@ -241,10 +241,6 @@ def searchBooks():
   except Exception as e:
     return jsonify({"Error": "Internal Server Error"}), 500
 
-@app.route('/userHome',methods=["GET"])
-def userHome():
-  return render_template('userHome.html', name=session['user'])
-
 @app.route("/userBooks",methods=["GET"])
 def userBooks():
   try:
@@ -253,9 +249,10 @@ def userBooks():
       cur.execute("SELECT b.name,b.author,s.name,b.avail FROM Book as b JOIN Section as s ON s.id = b.sectionID")
       data = cur.fetchall()
       print(data)
+      return jsonify({"Books":data}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
-  return render_template("userBooks.html",books=data)
+    return jsonify({"Error": "Internal Server Error"}), 500
 
 @app.route('/requestBooks',methods=['POST'])
 def requestBooks():

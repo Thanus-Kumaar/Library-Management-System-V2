@@ -11,6 +11,7 @@ import ReadBooks from "./components/readBooks.vue";
 import ManageSections from "./components/manageSections.vue";
 import ManageBooks from "./components/manageBooks.vue";
 import SearchBooks from "./components/searchBooks.vue";
+import UserBooks from "./components/userBooks.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -30,4 +31,5 @@ app.component("ReadBooks", ReadBooks)
 app.component("ManageSections",ManageSections)
 app.component("ManageBooks",ManageBooks)
 app.component("SearchBooks", SearchBooks)
+app.component("UserBooks", UserBooks)
 app.mount("#app");
