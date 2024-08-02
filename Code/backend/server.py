@@ -136,74 +136,94 @@ def manageSections():
 def manageBooks():
   if request.method == 'GET':
     try:
-      with sqlite3.connect("library.db") as con:
-        cur = con.cursor()
-        cur.execute("SELECT id,name,author,sectionID,avail FROM book")
-        books = cur.fetchall()
-        print(books)
-        return render_template("books.html",books=books)
-    except Exception as e:
-      print("Internal Server Error",str(e))
-  elif request.method == 'POST':
-    edit = request.form.get('isEdit','0')
-    file = request.files['book']
-    if edit=='0':
-      if file:
-        try:
-          save_path = os.path.join(app.config.get('UPLOAD_FOLDER'),file.filename)
-          file.save(save_path)
-          # with open(save_path, 'wb') as f:
-          #   f.seek(0)
-          #   print(file.read())
-          #   f.write(file.read())
-          with sqlite3.connect("library.db") as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO book(name,content,author,sectionID,avail) VALUES(?,?,?,?,?)",(file.filename,file.read(),request.form['author'],request.form['secID'],request.form['noOfBooks']))
-            return redirect('/manageBooks')
-        except Exception as e:
-          print("Internal Server Error:",str(e))
-          return("ERROR")
-    elif edit=='1':
-      params = []
-      query = "UPDATE book SET "
-      if(request.form['author']!=''):
-        query+='author = ?, '
-        params.append(request.form['author'])
-      if request.form['noOfBooks']!='':
-        query+='avail = ?, '
-        params.append(request.form['noOfBooks'])
-      if(request.form['secID']!=''):
-        query+='sectionID = ?, '
-        params.append(request.form['secID'])
-      if(file.filename!=''):
-        query+='name = ?, content = ?, '
-        params.append(file.filename)
-        params.append(file.read())
-      query = query.rstrip(', ')
-      query+=" WHERE id = ?"
-      params.append(request.form['bookID'])
-      try:
         with sqlite3.connect("library.db") as con:
-          cur = con.cursor()
-          cur.execute(query,params)
-          sections = cur.fetchall()
-          print(sections)
-          return redirect('/manageBooks')
-      except Exception as e:
-        print("User data not found in database",str(e))
-  elif request.method == 'DELETE':
-    try:
-      with sqlite3.connect("library.db") as con:
-        cur = con.cursor()
-        cur.execute("SELECT name FROM book WHERE id = ?",(request.args.get('bookID')))
-        filename = cur.fetchone()
-        print(filename[0])
-        cur.execute("DELETE FROM Book WHERE id = ?",(request.args.get('bookID')))
-        delete_path = os.path.join(app.config.get('UPLOAD_FOLDER'),filename[0])
-        os.remove(delete_path)
+            cur = con.cursor()
+            cur.execute("SELECT id, name, author, sectionID, avail FROM book")
+            books = cur.fetchall()
+            formatted_books = [{"id": book[0], "name": book[1], "author": book[2], "sectionID": book[3], "avail": book[4]} for book in books]
+            return jsonify({"books": formatted_books}), 200
     except Exception as e:
-      print("Unable to delete data: ",str(e))
-    return redirect('/manageBooks')
+        print("Internal Server Error:", str(e))
+        return jsonify({"Error": "Internal Server Error"}), 500
+
+  elif request.method == 'POST':
+    edit = request.form.get('isEdit', '0')
+    file = request.files.get('book', None)
+    print(edit)
+    if edit == '0':
+        if file:
+            try:
+                filename = file.filename
+                file_content = file.read()
+                save_path = os.path.join(app.config.get('UPLOAD_FOLDER'), filename)
+                
+                with open(save_path, 'wb') as f:
+                    f.write(file_content)
+                
+                with sqlite3.connect("library.db") as con:
+                    cur = con.cursor()
+                    cur.execute(
+                        "INSERT INTO book(name, content, author, sectionID, avail) VALUES(?,?,?,?,?)",
+                        (filename, file_content, request.form.get('author'), request.form.get('secID'), request.form.get('noOfBooks'))
+                    )
+                return jsonify({"SUCCESS": "Book added successfully"}), 200
+            except Exception as e:
+                print("Internal Server Error:", str(e))
+                return jsonify({"Error": "Internal Server Error"}), 500
+        else:
+          return jsonify({"ERR":"No file present"}), 400
+    elif edit == '1':
+        params = []
+        query = "UPDATE book SET "
+        if request.form.get('author'):
+            query += 'author = ?, '
+            params.append(request.form.get('author'))
+        if request.form.get('noOfBooks'):
+            query += 'avail = ?, '
+            params.append(request.form.get('noOfBooks'))
+        if request.form.get('secID'):
+            query += 'sectionID = ?, '
+            params.append(request.form.get('secID'))
+        if file and file.filename:
+                query += 'name = ?, content = ?, '
+                params.append(file.filename)
+                file_content = file.read()
+                params.append(file_content)
+        query = query.rstrip(', ')
+        query += " WHERE id = ?"
+        params.append(request.form.get('bookID'))
+
+        try:
+            with sqlite3.connect("library.db") as con:
+                cur = con.cursor()
+                cur.execute(query, params)
+            return jsonify({"SUCCESS": "Book updated successfully"}), 200
+        except Exception as e:
+            print("Internal Server Error:", str(e))
+            return jsonify({"Error": "Internal Server Error"}), 500
+
+  elif request.method == 'DELETE':
+    bookID = request.args.get('bookID')
+    if not bookID:
+        return jsonify({"Error": "BookID is required"}), 400
+    
+    try:
+        with sqlite3.connect("library.db") as con:
+            cur = con.cursor()
+            cur.execute("SELECT name FROM book WHERE id = ?", (bookID,))
+            filename = cur.fetchone()
+            if filename:
+                filename = filename[0]
+                cur.execute("DELETE FROM book WHERE id = ?", (bookID,))
+                delete_path = os.path.join(app.config.get('UPLOAD_FOLDER'), filename)
+                if os.path.exists(delete_path):
+                    os.remove(delete_path)
+            else:
+                return jsonify({"Error": "Book not found"}), 404
+        return jsonify({"SUCCESS": "Book deleted successfully"}), 200
+    except Exception as e:
+        print("Unable to delete data:", str(e))
+        return jsonify({"Error": "Internal Server Error"}), 500
   
 @app.route('/searchBooks',methods=['GET','POST'])
 def searchBooks():

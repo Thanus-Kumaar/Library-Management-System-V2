@@ -9,7 +9,7 @@ import AdminHome from "./components/adminHome.vue";
 import UserHome from "./components/userHome.vue";
 import ReadBooks from "./components/readBooks.vue";
 import ManageSections from "./components/manageSections.vue";
-
+import ManageBooks from "./components/manageBooks.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -27,4 +27,5 @@ app.component("AdminHome", AdminHome)
 app.component("UserHome", UserHome)
 app.component("ReadBooks", ReadBooks)
 app.component("ManageSections",ManageSections)
+app.component("ManageBooks",ManageBooks)
 app.mount("#app");
