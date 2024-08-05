@@ -12,24 +12,27 @@ import ManageSections from "./components/manageSections.vue";
 import ManageBooks from "./components/manageBooks.vue";
 import SearchBooks from "./components/searchBooks.vue";
 import UserBooks from "./components/userBooks.vue";
+import ManageIssueRevoke from "./components/manageIssueRevoke.vue";
+
+const routes = [
+  { path: '/', component: MainPage },
+  { path: '/login', component: Login },
+  { path: '/admin-home', component: AdminHome },
+  { path: '/user-home', component: UserHome },
+  { path: '/read-books', component: ReadBooks },
+  { path: '/manage-sections', component: ManageSections },
+  { path: '/manage-books', component: ManageBooks },
+  { path: '/search-books', component: SearchBooks },
+  { path: '/user-books', component: UserBooks },
+  { path: '/manage-issue-revoke', component: ManageIssueRevoke },
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes : [
-    { path: '/', component: MainPage },
-    { path: '/about', component: Login },
-  ]
-})
+  routes,
+});
 
 const app = createApp(App)
-app.component("MainPage", MainPage)
+app.use(router)
 app.component("Navbar", Navbar)
-app.component("Login", Login)
-app.component("AdminHome", AdminHome)
-app.component("UserHome", UserHome)
-app.component("ReadBooks", ReadBooks)
-app.component("ManageSections",ManageSections)
-app.component("ManageBooks",ManageBooks)
-app.component("SearchBooks", SearchBooks)
-app.component("UserBooks", UserBooks)
 app.mount("#app");

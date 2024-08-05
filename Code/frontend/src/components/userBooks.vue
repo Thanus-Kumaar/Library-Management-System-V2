@@ -61,7 +61,7 @@ export default {
       axios
         .get("http://127.0.0.1:5000/userBooks")
         .then((response) => {
-          this.books = response.data.books; // Adjust according to the response structure
+          this.books = response.data.books;
         })
         .catch((error) => {
           console.error("Error fetching books:", error);
@@ -69,7 +69,7 @@ export default {
     },
     requestBook(bookName) {
       axios
-        .post("/requestBooks", { book: bookName })
+        .post("http://127.0.0.1:5000/manageIssueRevoke", { book: bookName })
         .then((response) => {
           alert(response.data.msg);
         })

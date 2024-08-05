@@ -266,20 +266,21 @@ def requestBooks():
       borrowedNo = len(cur.fetchall())
       print(borrowedNo)
       if(borrowedNo==5):
-        return jsonify({"msg":"Already have 5 books, cannot borrow more!"})
+        return jsonify({"msg":"Already have 5 books, cannot borrow more!"}), 200
       else:
         cur.execute("SELECT bw.uname FROM borrowed as bw JOIN book as b ON bw.bookid = b.id WHERE bw.uname = ? AND b.name = ?",(uname,bookname))
         data = cur.fetchall()
         print(data)
         if(len(data)>0):
-          return jsonify({"msg":"already requested"})
+          return jsonify({"msg":"already requested"}), 200
         cur.execute("SELECT id FROM book WHERE name = ?",(bookname,))
         bookID = cur.fetchone()[0]
         print(bookID)
         cur.execute("INSERT INTO borrowed VALUES (?,?,0,?,?)",(uname,bookID,None,None))
+        return jsonify({"msg":"Request submitted"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
-  return jsonify({"msg":"Request submitted"})
+    return jsonify({"ERR":"Internal Server Error"}), 5500
 
 @app.route('/manageIssueRevoke',methods=["GET"])
 def manageIssueRevoke():
@@ -288,10 +289,11 @@ def manageIssueRevoke():
       cur = con.cursor()
       cur.execute("SELECT bw.bookid, bw.uname, b.name, b.author, b.avail, bw.issueDate, bw.returnDate, bw.status FROM borrowed bw JOIN book b ON bw.bookid = b.id ORDER BY bw.status")
       data = cur.fetchall()
-      return render_template('manageIssueRevoke.html',books = data)
+      return jsonify({"Books":data}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
-
+    return jsonify({"ERR":"Internal Server Error"}), 500
+  
 @app.route('/issueBook',methods=["POST"])
 def issueBook():
   try:

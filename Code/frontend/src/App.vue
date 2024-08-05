@@ -1,7 +1,7 @@
 <template>
   <div class="text-light" style="padding-left: 100px; padding-right: 100px;">
     <Navbar />
-    <UserBooks />
+    <router-view></router-view>
 </div>
 </template>
 
