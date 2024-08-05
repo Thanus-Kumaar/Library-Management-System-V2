@@ -78,7 +78,7 @@ export default {
           if (response.status == 200){
             localStorage.setItem('role', response.data.Role)
             if (response.data.Role == 1){
-              this.$router.push('/adminHome')
+              this.$router.push('/admin-home')
             }
           }
         });

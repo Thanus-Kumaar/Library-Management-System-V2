@@ -67,6 +67,9 @@ export default {
     navigate(path) {
       window.location.href = path;
     }
+  },
+  created(){
+    this.$checkUserRole("admin"); 
   }
 };
 </script>
