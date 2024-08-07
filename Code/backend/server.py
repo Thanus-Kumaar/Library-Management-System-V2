@@ -303,9 +303,10 @@ def issueBook():
       revokeDate = currDate + timedelta(days=7)
       cur.execute("UPDATE borrowed SET issueDate = ?, returnDate = ?, status = 1 WHERE uname = ? AND bookid = ?",(currDate,revokeDate,request.json.get('user'),request.json.get('bookid')))
       cur.execute("UPDATE book SET avail = avail - 1 WHERE id = ?",(request.json.get('bookid'),))
-      return redirect('/manageIssueRevoke')
+      return jsonify({"MSG":"Book issued successfully"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
+    return jsonify({"ERR":"Internal Server Error"}), 500
 
 @app.route('/revokeBook',methods=["POST"])
 def revokeBook():
@@ -314,9 +315,10 @@ def revokeBook():
       cur = con.cursor()
       cur.execute("DELETE FROM borrowed WHERE bookid = ? AND uname = ?",(request.json.get('bookid'),request.json.get('user')))
       cur.execute("UPDATE book SET avail = avail + 1 WHERE id = ?",(request.json.get('bookid'),))
-      return redirect('/manageIssueRevoke')
+      return jsonify({"MSG":"Book revoked successfully"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
+    return jsonify({"ERR":"Internal Server Error"}), 500
 
 @app.route('/readBooks',methods=["GET"])
 def readBooks():
@@ -351,6 +353,19 @@ def returnBook():
       return redirect('/readBooks')
   except Exception as e:
     print("Internal Server Error: ",e)
+
+@app.route('/getAllUserDetails', methods=["GET"])
+def getAllUserDetails():
+  try:
+    with sqlite3.connect("library.db") as con:
+      cur = con.cursor()
+      cur.execute("SELECT uname, role FROM User")
+      data = cur.fetchall()
+      print(data)
+      return jsonify({"User Data":data}), 200
+  except Exception as e:
+    print("Internal Server Error: ",e)
+    return jsonify({"Error":"Internal Server Error"}), 500
 
 if __name__ == '__main__':
   try:

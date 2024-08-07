@@ -20,7 +20,6 @@
       </div>
     </div>
 
-    <!-- Modal -->
     <div class="modal" tabindex="-1" id="UsersModal" aria-labelledby="UsersModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -38,8 +37,8 @@
               </thead>
               <tbody>
                 <tr v-for="(user, index) in userData" :key="index">
-                  <td>{{ user.username }}</td>
-                  <td>{{ user.role }}</td>
+                  <td>{{ user[0] }}</td>
+                  <td>{{ user[1] }}</td>
                 </tr>
               </tbody>
             </table>
@@ -51,25 +50,32 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   data() {
     return {
-      name: 'User', // Placeholder, replace with actual data
+      name: 'User',
       userData: [
-        { username: 'John Doe', role: 'Admin' },
-        { username: 'Jane Smith', role: 'Librarian' },
-        // Add more user data as needed
       ],
-      currentPath: window.location.pathname // Tracks the current path for active class
     };
   },
   methods: {
     navigate(path) {
       window.location.href = path;
+    },
+    getUserDetails(){
+      axios.get("http://127.0.0.1:5000/getAllUserDetails")
+      .then((response)=>{
+        if(response.status == 200){
+          console.log(response)
+          this.userData = response.data["User Data"]
+        }
+      })
     }
   },
   created(){
-    this.$checkUserRole("admin"); 
+    this.$checkUserRole("admin");
+    this.getUserDetails();
   }
 };
 </script>

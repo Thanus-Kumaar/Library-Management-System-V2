@@ -35,19 +35,20 @@
           <button
             class="btn btn-dark btn-block w-50 mx-auto"
             @click="loginForm()"
+            :disabled="!isFormValid"
           >
-            {{ !flagToChangeAdmin ? "Login" : "SignUp" }}
+            {{ !flagToChangeAdmin ? "Login" : "Sign Up" }}
           </button>
         </div>
-        <div class="mt-4" v-show="!flagToChangeAdmin"  @click="toggleSignUp()">
-          <div class="text-dark text-decoration-underline" style="float: right; cursor: pointer;"
-            >Didn't sign up yet? Sign in here</div
-          >
+        <div class="mt-4" v-show="!flagToChangeAdmin" @click="toggleSignUp()">
+          <div class="text-dark text-decoration-underline" style="float: right; cursor: pointer;">
+            Didn't sign up yet? Sign up here
+          </div>
         </div>
-        <div class="mt-4" v-show="flagToChangeAdmin"  @click="toggleSignUp()">
-          <div class="text-dark text-decoration-underline" style="float: right; cursor: pointer;"
-            >Already signed in? Login here</div
-          >
+        <div class="mt-4" v-show="flagToChangeAdmin" @click="toggleSignUp()">
+          <div class="text-dark text-decoration-underline" style="float: right; cursor: pointer;">
+            Already signed up? Login here
+          </div>
         </div>
       </div>
     </div>
@@ -56,6 +57,7 @@
 
 <script>
 import axios from "axios";
+
 export default {
   data() {
     return {
@@ -65,44 +67,50 @@ export default {
       flagToChangeAdmin: false
     };
   },
-  methods: {
-    loginForm() {
-      if (this.flagToChangeAdmin == false){
-        axios
-        .post("http://127.0.0.1:5000/loginUser", {
-          userName: this.uname,
-          password: this.password,
-        })
-        .then((response) => {
-          console.log(response);
-          if (response.status == 200){
-            localStorage.setItem('role', response.data.Role)
-            if (response.data.Role == 1){
-              this.$router.push('/admin-home')
-            }
-          }
-        });
-      } else {
-        axios
-        .post("http://127.0.0.1:5000/addUser", {
-          userName: this.uname,
-          password: this.password,
-          isAdmin: this.isAdmin
-        })
-        .then((response) => {
-          console.log(response);
-          if (response.status == 200){
-            this.flagToChangeAdmin = false
-            this.uname == ""
-            this.password == ""
-          }
-        });
-      }
-      
-    },
-    toggleSignUp() {
-      this.flagToChangeAdmin = !this.flagToChangeAdmin
+  computed: {
+    isFormValid() {
+      return this.uname.trim() !== "" && this.password.trim() !== "";
     }
   },
+  methods: {
+    loginForm() {
+      if (this.flagToChangeAdmin == false) {
+        axios
+          .post("http://127.0.0.1:5000/loginUser", {
+            userName: this.uname,
+            password: this.password,
+          })
+          .then((response) => {
+            console.log(response);
+            if (response.status == 200) {
+              localStorage.setItem('role', response.data.Role);
+              if (response.data.Role == 1) {
+                this.$router.push('/admin-home');
+              } else {
+                this.$router.push('/user-home'); // Assuming there's a user home route
+              }
+            }
+          });
+      } else {
+        axios
+          .post("http://127.0.0.1:5000/addUser", {
+            userName: this.uname,
+            password: this.password,
+            isAdmin: this.isAdmin
+          })
+          .then((response) => {
+            console.log(response);
+            if (response.status == 200) {
+              this.flagToChangeAdmin = false;
+              this.uname = "";
+              this.password = "";
+            }
+          });
+      }
+    },
+    toggleSignUp() {
+      this.flagToChangeAdmin = !this.flagToChangeAdmin;
+    }
+  }
 };
 </script>

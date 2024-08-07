@@ -14,6 +14,7 @@ import SearchBooks from "./components/searchBooks.vue";
 import UserBooks from "./components/userBooks.vue";
 import ManageIssueRevoke from "./components/manageIssueRevoke.vue";
 import ErrorPage from "./components/errorPage.vue";
+import ViewPdfFile from "./components/viewPdfFile.vue";
 
 import authPlugin from "./auth/authPlugin";
 
@@ -29,6 +30,7 @@ const routes = [
   { path: '/user-books', component: UserBooks },
   { path: '/manage-issue-revoke', component: ManageIssueRevoke },
   { path: '/error-page', component: ErrorPage},
+  { path: '/view-file', component: ViewPdfFile},
 ];
 
 const router = createRouter({
