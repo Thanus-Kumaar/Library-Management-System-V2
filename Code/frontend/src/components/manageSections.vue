@@ -225,6 +225,7 @@ export default {
   },
   created() {
     this.fetchSections();
+    this.$checkUserRole("admin");
   }
 };
 </script>

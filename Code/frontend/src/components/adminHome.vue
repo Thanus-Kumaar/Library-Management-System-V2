@@ -11,11 +11,11 @@
       </div>
       <div class="d-flex flex-fill">
         <div class="d-flex flex-column mx-auto row-gap-3">
-          <button class="btn btn-light" type="button" @click="navigate('/manageBooks')">Manage Books</button>
-          <button class="btn btn-light" type="button" @click="navigate('/manageSections')">Manage Sections</button>
+          <button class="btn btn-light" type="button" @click="navigate('/manage-books')">Manage Books</button>
+          <button class="btn btn-light" type="button" @click="navigate('/manage-sections')">Manage Sections</button>
           <button class="btn btn-light" type="button" data-bs-toggle="modal" data-bs-target="#UsersModal">View Users</button>
-          <button class="btn btn-light" type="button" @click="navigate('/manageIssueRevoke')">Manage Issue / Revoke</button>
-          <button class="btn btn-light" type="button" @click="navigate('/searchBooks')">Search Books</button>
+          <button class="btn btn-light" type="button" @click="navigate('/manage-issue-revoke')">Manage Issue / Revoke</button>
+          <button class="btn btn-light" type="button" @click="navigate('/search-books')">Search Books</button>
         </div>
       </div>
     </div>

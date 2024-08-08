@@ -33,7 +33,7 @@ export default {
       if (filename) {
         try {
           const response = await axios.get(`/view-file?filename=${filename}`, {
-            responseType: 'blob', // Important for handling binary data
+            responseType: 'blob',
           });
           const url = window.URL.createObjectURL(new Blob([response.data]));
           this.pdfUrl = url;

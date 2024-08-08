@@ -22,7 +22,7 @@
             <td>
               <button
                 type="button"
-                @click="navigate(`/readSection?book=${book.name}`)"
+                @click="navigate(`/pdf-viewer?book=${book.name}`)"
                 class="btn btn-light"
               >
                 Read Book
@@ -62,6 +62,7 @@ export default {
         books = response.data.books
       }
     });
+    this.$
   },
 };
 </script>

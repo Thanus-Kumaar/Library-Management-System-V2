@@ -1,7 +1,10 @@
 <template>
   <div>
     <div class="p-4">
-      <table class="table table-primary table-hover table-bordered table-responsive align-middle">
+      <h2 v-if="books.length == 0" class="text-center" style="margin-top: 100px;">
+        No requests currently
+      </h2>
+      <table class="table table-primary table-hover table-bordered table-responsive align-middle" v-if="books.length != 0">
         <thead class="table-dark">
           <tr>
             <th>Book ID</th>
@@ -71,17 +74,18 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      books: [] // This will hold the book data
+      books: []
     };
   },
   created() {
-    this.fetchBooks(); // Fetch books when component is created
+    this.fetchBooks();
+    this.$checkUserRole("admin");
   },
   methods: {
     async fetchBooks() {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/getBooks'); // Adjust the URL to your API
-        this.books = response.data;
+        const response = await axios.get('http://127.0.0.1:5000/manageIssueRevoke');
+        this.books = response.data.Books;
       } catch (error) {
         console.error('Error fetching books:', error);
       }

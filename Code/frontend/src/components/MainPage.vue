@@ -11,7 +11,7 @@
         for both librarians and patrons to stay organized.
       </div>
       <a href="">
-        <button class="btn btn-secondary mt-4">
+        <button class="btn btn-secondary mt-4" @click="this.$router.push('/login')">
           Sign In to continue
         </button>
       </a>

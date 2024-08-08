@@ -269,7 +269,7 @@ import axios from "axios";
 export default {
   data() {
     return {
-      books: [], // Books data
+      books: [],
       newBook: {
         file: null,
         author: "",
@@ -285,6 +285,9 @@ export default {
       isEdit: "0",
       isEditEdit: "1",
     };
+  },
+  created(){
+    this.$checkUserRole("admin");
   },
   methods: {
     fetchBooks() {

@@ -58,7 +58,8 @@ def loginUser():
       elif(role==0):
         return jsonify({"MSG":"Successful Login", "Name":username, "Role": role})
   except Exception as e:
-    print("User data not found in database",str(e)), 400
+    print("User data not found in database",str(e))
+    return jsonify({"ERROR":"User data not found in database"}), 400
   return jsonify({"ERROR":"Login Failed!"})
 
 @app.route("/adminHome",methods=['GET'])
@@ -153,6 +154,15 @@ def manageBooks():
     if edit == '0':
         if file:
             try:
+                with sqlite3.connect("library.db") as con:
+                    cur = con.cursor()
+                    cur.execute(
+                        "SELECT * FROM Section WHERE id = ?",
+                        (request.form.get('secID'))
+                    )
+                    sec = cur.fetchall()
+                    if(not sec or len(sec)):
+                      return jsonify({"ERR":"Section ID doesn't exist!"}), 400
                 filename = file.filename
                 file_content = file.read()
                 save_path = os.path.join(app.config.get('UPLOAD_FOLDER'), filename)
@@ -237,7 +247,7 @@ def searchBooks():
       cur.execute("SELECT b.id,b.name,b.author,s.name FROM Book as b JOIN Section as s ON s.id = b.sectionID WHERE b.name LIKE ? AND b.author LIKE ?",(book_search,author_search))
       data = cur.fetchall()
       print(data)
-      return jsonify({"data":data}), 200
+      return jsonify({"books":data}), 200
   except Exception as e:
     return jsonify({"Error": "Internal Server Error"}), 500
 
@@ -289,6 +299,7 @@ def manageIssueRevoke():
       cur = con.cursor()
       cur.execute("SELECT bw.bookid, bw.uname, b.name, b.author, b.avail, bw.issueDate, bw.returnDate, bw.status FROM borrowed bw JOIN book b ON bw.bookid = b.id ORDER BY bw.status")
       data = cur.fetchall()
+      print(data)
       return jsonify({"Books":data}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
@@ -372,6 +383,7 @@ if __name__ == '__main__':
     with sqlite3.connect("library.db") as con:
       cur = con.cursor()
       # role 1-User 2-Admin
+      con.execute("PRAGMA foreign_keys = ON")
       cur.execute("CREATE TABLE IF NOT EXISTS User(uname varchar(50), password varchar(255), role integer, primary key(uname,password))")
       cur.execute("CREATE TABLE IF NOT EXISTS Section(id integer primary key autoincrement, name varchar(255), creationDate date, description varchar(255))")
       cur.execute("CREATE TABLE IF NOT EXISTS Book(id integer primary key autoincrement , name varchar(255), content blob, author varchar(255), avail integer, sectionID integer, foreign key (sectionID) references Section(id))")
