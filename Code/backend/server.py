@@ -154,14 +154,15 @@ def manageBooks():
     if edit == '0':
         if file:
             try:
+                print(request.form.get('secID'))
                 with sqlite3.connect("library.db") as con:
                     cur = con.cursor()
                     cur.execute(
-                        "SELECT * FROM Section WHERE id = ?",
-                        (request.form.get('secID'))
+                        "SELECT * FROM Section WHERE id = ?",(request.form.get('secID'),)
                     )
                     sec = cur.fetchall()
-                    if(not sec or len(sec)):
+                    print(sec)
+                    if(not sec or len(sec)==0):
                       return jsonify({"ERR":"Section ID doesn't exist!"}), 400
                 filename = file.filename
                 file_content = file.read()

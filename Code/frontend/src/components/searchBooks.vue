@@ -47,10 +47,10 @@
         </thead>
         <tbody>
           <tr v-for="book in books" :key="book.id">
-            <td>{{ book.id }}</td>
-            <td>{{ book.name }}</td>
-            <td>{{ book.author }}</td>
-            <td>{{ book.section }}</td>
+            <td>{{ book[0] }}</td>
+            <td>{{ book[1] }}</td>
+            <td>{{ book[2] }}</td>
+            <td>{{ book[3] }}</td>
           </tr>
         </tbody>
       </table>
@@ -78,12 +78,16 @@ export default {
     searchBooks() {
       axios.post('http://127.0.0.1:5000/searchBooks', this.searchCriteria)
         .then(response => {
+        console.log(response)
           this.books = response.data.books;
         })
         .catch(error => {
           console.error('Error fetching books:', error);
         });
     }
+  },
+  created(){
+    this.searchBooks();
   }
 };
 </script>
