@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
   data() {
     return {
@@ -45,7 +46,14 @@ export default {
     },
     logout() {
       localStorage.removeItem('role');
-      this.$router.replace('/');
+      localStorage.removeItem('username');
+      axios.get("http://127.0.0.1:5000/logOut")
+      .then((response)=>{
+        console.log(response)
+        if(response.status==200){
+          this.$router.replace('/');
+        }
+      })
     }
   }
 };

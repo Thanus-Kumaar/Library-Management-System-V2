@@ -84,10 +84,11 @@ export default {
             console.log(response);
             if (response.status == 200) {
               localStorage.setItem('role', response.data.Role);
+              localStorage.setItem('username',response.data.Name);
               if (response.data.Role == 1) {
                 this.$router.push('/admin-home');
               } else {
-                this.$router.push('/user-home'); // Assuming there's a user home route
+                this.$router.push('/user-home');
               }
             }
           });

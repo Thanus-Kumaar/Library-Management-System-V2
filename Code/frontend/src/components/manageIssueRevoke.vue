@@ -20,17 +20,17 @@
         </thead>
         <tbody>
           <tr v-for="book in books" :key="book.id">
-            <td>{{ book.id }}</td>
-            <td>{{ book.username }}</td>
-            <td>{{ book.name }}</td>
-            <td>{{ book.author }}</td>
-            <td>{{ book.availability }}</td>
-            <td>{{ book.issueDate }}</td>
-            <td>{{ book.returnDate }}</td>
+            <td>{{ book[0] }}</td>
+            <td>{{ book[1] }}</td>
+            <td>{{ book[2] }}</td>
+            <td>{{ book[3] }}</td>
+            <td>{{ book[4] }}</td>
+            <td>{{ book[5] }}</td>
+            <td>{{ book[6] }}</td>
             <td>
               <button
-                v-if="book.status === 0 && book.availability > 0"
-                @click="issueBook(book.id, book.username)"
+                v-if="book[7] === 0 && book[4] > 0"
+                @click="issueBook(book[0], book[1])"
                 class="btn btn-light"
               >
                 Issue Book
@@ -46,8 +46,8 @@
             </td>
             <td>
               <button
-                v-if="book.status === 1"
-                @click="revokeBook(book.id, book.username)"
+                v-if="book[7] === 1"
+                @click="revokeBook(book[0], book[1])"
                 class="btn btn-light"
               >
                 Revoke Book
@@ -92,13 +92,13 @@ export default {
     },
     async issueBook(bookId, username) {
       try {
-        const response = await axios.post('/issueBook', {
+        const response = await axios.post('http://127.0.0.1:5000/issueBook', {
           bookid: bookId,
           user: username
         });
         if (response.status === 200) {
           console.log('Successfully Issued');
-          this.fetchBooks(); // Refresh the book list
+          this.fetchBooks();
         }
       } catch (error) {
         console.error('Error issuing book:', error);
@@ -106,13 +106,13 @@ export default {
     },
     async revokeBook(bookId, username) {
       try {
-        const response = await axios.post('/revokeBook', {
+        const response = await axios.post('http://127.0.0.1:5000/revokeBook', {
           bookid: bookId,
           user: username
         });
         if (response.status === 200) {
           console.log('Successfully Revoked');
-          this.fetchBooks(); // Refresh the book list
+          this.fetchBooks();
         }
       } catch (error) {
         console.error('Error revoking book:', error);

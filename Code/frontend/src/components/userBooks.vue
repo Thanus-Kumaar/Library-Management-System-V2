@@ -20,18 +20,18 @@
         </thead>
         <tbody>
           <tr v-for="book in books" :key="book.name">
-            <td>{{ book.name }}</td>
-            <td>{{ book.author }}</td>
-            <td>{{ book.section }}</td>
+            <td>{{ book[0] }}</td>
+            <td>{{ book[1] }}</td>
+            <td>{{ book[2] }}</td>
             <td>
-              <span v-if="book.availability > 0">Available</span>
+              <span v-if="book[2] > 0">Available</span>
               <span v-else>Not Available</span>
             </td>
             <td>
               <button
                 type="button"
-                @click="requestBook(book.name)"
-                :disabled="book.availability <= 0"
+                @click="requestBook(book[0])"
+                :disabled="book[2] <= 0"
                 class="btn btn-light"
               >
                 Request Book
@@ -53,7 +53,7 @@ export default {
       books: [],
     };
   },
-  mounted() {
+  created() {
     this.fetchBooks();
   },
   methods: {
@@ -61,7 +61,10 @@ export default {
       axios
         .get("http://127.0.0.1:5000/userBooks")
         .then((response) => {
-          this.books = response.data.books;
+          if(response.status == 200){
+            console.log(response.data)
+            this.books = response.data.Books;
+          }
         })
         .catch((error) => {
           console.error("Error fetching books:", error);
@@ -69,7 +72,7 @@ export default {
     },
     requestBook(bookName) {
       axios
-        .post("http://127.0.0.1:5000/manageIssueRevoke", { book: bookName })
+        .post("http://127.0.0.1:5000/requestBooks", { book: bookName })
         .then((response) => {
           alert(response.data.msg);
         })

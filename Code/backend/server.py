@@ -9,6 +9,12 @@ abs = os.path.abspath(__file__)
 uploadPath = abs[0:-9]+"uploads"
 app.config['UPLOAD_FOLDER'] = uploadPath
 
+@app.route('/logOut',methods=['GET'])
+def logOut():
+  session['user']=None
+  session['role']=None
+  return jsonify({"SUCCESS":"Logout successful!"}), 200
+
 @app.route('/addUser',methods=['POST'])
 def addUser():
   data = request.json
@@ -27,7 +33,7 @@ def addUser():
       cur.execute("SELECT * FROM user WHERE uname = ? AND password = ?",(username, password))
       user = cur.fetchall()
       print("#####",user)
-      if(user==None or user==""):
+      if(user==None or len(user)==0):
         cur.execute("INSERT INTO user VALUES(?,?,?)",(username,password,int(isAdmin)))
         print("User added successfully !")
         return jsonify({"SUCCESS":"User created successfully!"}), 200
@@ -49,7 +55,9 @@ def loginUser():
     with sqlite3.connect("library.db") as con:
       cur = con.cursor()
       cur.execute("SELECT * FROM user WHERE uname = ? AND password = ?",(username,password))
-      role = cur.fetchall()[0][-1]
+      data = cur.fetchall()
+      print(data)
+      role = data[0][-1]
       print("User found successfully !")
       session['user'] = username
       session['role'] = role
@@ -60,7 +68,6 @@ def loginUser():
   except Exception as e:
     print("User data not found in database",str(e))
     return jsonify({"ERROR":"User data not found in database"}), 400
-  return jsonify({"ERROR":"Login Failed!"})
 
 @app.route("/adminHome",methods=['GET'])
 def adminHome():
@@ -151,6 +158,7 @@ def manageBooks():
     edit = request.form.get('isEdit', '0')
     file = request.files.get('book', None)
     print(edit)
+    print(request.form)
     if edit == '0':
         if file:
             try:
@@ -339,6 +347,7 @@ def readBooks():
       cur = con.cursor()
       cur.execute("SELECT b.name, b.author, s.name FROM book b JOIN section s ON b.sectionID = s.id WHERE b.id IN (SELECT bookid FROM borrowed WHERE uname = ? AND status = 1)",(session.get('user'),))
       data = cur.fetchall()
+      print(data)
       return jsonify({"books":data}), 200
   except Exception as e:
     print("Internal Server Error: ",e)

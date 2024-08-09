@@ -2,8 +2,12 @@
   <div>
     <div class="p-4">
       <h2 class="text-center mb-4">Read your e-books here</h2>
+      <div v-if="books.length == 0" class="text-center" style="margin-top: 200px;">
+        Borrow or request books first to read them!
+      </div>
       <table
         class="table table-primary table-hover table-bordered table-responsive align-middle"
+        v-if="books.length != 0"
       >
         <thead class="table-dark">
           <tr>

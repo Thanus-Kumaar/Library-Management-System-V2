@@ -54,7 +54,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      name: 'User',
+      name: localStorage.getItem('username'),
       userData: [
       ],
     };
