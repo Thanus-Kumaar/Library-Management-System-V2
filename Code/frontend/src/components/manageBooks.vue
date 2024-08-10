@@ -129,6 +129,27 @@
                 <button type="submit" class="btn btn-primary">Add Book</button>
               </div>
             </form>
+            <div
+              v-if="showAlert"
+              :class="[
+                'alert',
+                alertClass,
+                'alert-dismissible',
+                'fade',
+                'show',
+                'mx-auto',
+              ]"
+              role="alert"
+              style="width: 400px; margin-top: 10px"
+            >
+              {{ alertMessage }}
+              <button
+                type="button"
+                class="btn-close"
+                @click="showAlert = false"
+                aria-label="Close"
+              ></button>
+            </div>
           </div>
         </div>
       </div>
@@ -209,6 +230,27 @@
                 <button type="submit" class="btn btn-primary">Edit Book</button>
               </div>
             </form>
+            <div
+              v-if="showAlert"
+              :class="[
+                'alert',
+                alertClass,
+                'alert-dismissible',
+                'fade',
+                'show',
+                'mx-auto',
+              ]"
+              role="alert"
+              style="width: 400px; margin-top: 10px"
+            >
+              {{ alertMessage }}
+              <button
+                type="button"
+                class="btn-close"
+                @click="showAlert = false"
+                aria-label="Close"
+              ></button>
+            </div>
           </div>
         </div>
       </div>
@@ -256,6 +298,27 @@
                 </button>
               </div>
             </form>
+            <div
+              v-if="showAlert"
+              :class="[
+                'alert',
+                alertClass,
+                'alert-dismissible',
+                'fade',
+                'show',
+                'mx-auto',
+              ]"
+              role="alert"
+              style="width: 400px; margin-top: 10px"
+            >
+              {{ alertMessage }}
+              <button
+                type="button"
+                class="btn-close"
+                @click="showAlert = false"
+                aria-label="Close"
+              ></button>
+            </div>
           </div>
         </div>
       </div>
@@ -284,9 +347,12 @@ export default {
       deleteBookID: "",
       isEdit: "0",
       isEditEdit: "1",
+      showAlert: false,
+      alertMessage: "",
+      alertClass: "",
     };
   },
-  created(){
+  created() {
     this.$checkUserRole("admin");
   },
   methods: {
@@ -326,15 +392,24 @@ export default {
           },
         })
         .then((response) => {
-          this.fetchBooks();
-          this.newBook = { file: null, author: "", avail: "", sectionID: "" };
-          const modal = new bootstrap.Modal(
-            document.getElementById("addBookModal")
-          );
-          modal.hide();
+          if (response.status == 200) {
+            this.fetchBooks();
+            this.newBook = { file: null, author: "", avail: "", sectionID: "" };
+            const modal = new bootstrap.Modal(
+              document.getElementById("addBookModal")
+            );
+            modal.hide();
+          } else if (response.status == 400) {
+            this.alertMessage = response.data.ERROR;
+            this.alertClass = "alert-danger";
+            this.showAlert = true;
+          }
         })
         .catch((error) => {
           console.error("Error adding book:", error);
+          this.alertMessage = "Error adding book!";
+          this.alertClass = "alert-danger";
+          this.showAlert = true;
         });
     },
     editBook() {
@@ -359,6 +434,9 @@ export default {
         })
         .catch((error) => {
           console.error("Error editing book:", error);
+          this.alertMessage = "Error editing book!";
+          this.alertClass = "alert-danger";
+          this.showAlert = true;
         });
     },
     deleteBook() {
@@ -369,9 +447,6 @@ export default {
           this.deleteBookID = "";
           document.getElementById("deleteBookModal").modal("hide");
         })
-        .catch((error) => {
-          console.error("Error deleting book:", error);
-        });
     },
   },
   mounted() {

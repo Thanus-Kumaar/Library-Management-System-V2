@@ -24,14 +24,14 @@
             <td>{{ book[1] }}</td>
             <td>{{ book[2] }}</td>
             <td>
-              <span v-if="book[2] > 0">Available</span>
+              <span v-if="book[3] > 0">Available</span>
               <span v-else>Not Available</span>
             </td>
             <td>
               <button
                 type="button"
                 @click="requestBook(book[0])"
-                :disabled="book[2] <= 0"
+                :disabled="book[3] <= 0"
                 class="btn btn-light"
               >
                 Request Book
@@ -55,6 +55,7 @@ export default {
   },
   created() {
     this.fetchBooks();
+    this.$checkUserRole("user");
   },
   methods: {
     fetchBooks() {
@@ -72,7 +73,7 @@ export default {
     },
     requestBook(bookName) {
       axios
-        .post("http://127.0.0.1:5000/requestBooks", { book: bookName })
+        .post("http://127.0.0.1:5000/requestBooks", { book: bookName, user:localStorage.getItem('username') })
         .then((response) => {
           alert(response.data.msg);
         })

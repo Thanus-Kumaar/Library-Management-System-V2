@@ -171,7 +171,7 @@ def manageBooks():
                     sec = cur.fetchall()
                     print(sec)
                     if(not sec or len(sec)==0):
-                      return jsonify({"ERR":"Section ID doesn't exist!"}), 400
+                      return jsonify({"ERROR":"Section ID doesn't exist!"}), 400
                 filename = file.filename
                 file_content = file.read()
                 save_path = os.path.join(app.config.get('UPLOAD_FOLDER'), filename)
@@ -275,7 +275,7 @@ def userBooks():
 
 @app.route('/requestBooks',methods=['POST'])
 def requestBooks():
-  uname = session.get('user')
+  uname = request.json.get('user')
   bookname = request.json.get('book')
   print(uname,bookname)
   try:
@@ -319,6 +319,7 @@ def issueBook():
   try:
     with sqlite3.connect("library.db") as con:
       cur = con.cursor()
+      print(request.json)
       currDate = datetime.now().date()
       revokeDate = currDate + timedelta(days=7)
       cur.execute("UPDATE borrowed SET issueDate = ?, returnDate = ?, status = 1 WHERE uname = ? AND bookid = ?",(currDate,revokeDate,request.json.get('user'),request.json.get('bookid')))
@@ -343,9 +344,12 @@ def revokeBook():
 @app.route('/readBooks',methods=["GET"])
 def readBooks():
   try:
+    user = request.args.get('user')
+    if not user:
+        return jsonify({"Error": "User not provided"}), 400
     with sqlite3.connect("library.db") as con:
       cur = con.cursor()
-      cur.execute("SELECT b.name, b.author, s.name FROM book b JOIN section s ON b.sectionID = s.id WHERE b.id IN (SELECT bookid FROM borrowed WHERE uname = ? AND status = 1)",(session.get('user'),))
+      cur.execute("SELECT b.name, b.author, s.name FROM book b JOIN section s ON b.sectionID = s.id WHERE b.id IN (SELECT bookid FROM borrowed WHERE uname = ? AND status = 1)",(user,))
       data = cur.fetchall()
       print(data)
       return jsonify({"books":data}), 200
@@ -356,9 +360,17 @@ def readBooks():
 @app.route('/view-file')
 def view_file():
     filename = request.args.get('filename')
+    print(filename)
+    if not filename:
+      return jsonify({"ERROR":'Filename is required'}), 400
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    return send_file(filepath, as_attachment=False)
-
+    if not os.path.exists(filepath):
+      return jsonify({"ERROR":'file path not found!'}), 400
+    response = send_file(filepath, mimetype='application/pdf')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/readSection',methods=["GET"])
 def readSection():
@@ -367,13 +379,15 @@ def readSection():
 @app.route('/returnBook',methods=["POST"])
 def returnBook():
   try:
+    print(request.json)
     with sqlite3.connect("library.db") as con:
       cur = con.cursor()
-      cur.execute("DELETE FROM borrowed WHERE bookid = (SELECT id FROM book WHERE name = ?) AND uname = ?",(request.json.get('book'),session.get('user')))
+      cur.execute("DELETE FROM borrowed WHERE bookid = (SELECT id FROM book WHERE name = ?) AND uname = ?",(request.json.get('book'), request.json.get('user')))
       cur.execute("UPDATE book SET avail = avail + 1 WHERE name = ?",(request.json.get('book'),))
-      return redirect('/readBooks')
+      return jsonify({"MSG":"Successfully returned the book!"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
+    return jsonify({"Error":"Internal Server Error"}), 500
 
 @app.route('/getAllUserDetails', methods=["GET"])
 def getAllUserDetails():

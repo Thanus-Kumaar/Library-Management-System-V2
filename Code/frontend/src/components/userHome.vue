@@ -29,6 +29,9 @@ export default {
     navigate(path) {
       window.location.href = path;
     }
+  },
+  created(){
+    this.$checkUserRole("user");
   }
 };
 </script>

@@ -2,7 +2,11 @@
   <div>
     <div class="p-4">
       <h2 class="text-center mb-4">Read your e-books here</h2>
-      <div v-if="books.length == 0" class="text-center" style="margin-top: 200px;">
+      <div
+        v-if="books.length == 0"
+        class="text-center"
+        style="margin-top: 200px"
+      >
         Borrow or request books first to read them!
       </div>
       <table
@@ -20,13 +24,13 @@
         </thead>
         <tbody>
           <tr v-for="(book, index) in books" :key="index">
-            <td>{{ book.name }}</td>
-            <td>{{ book.author }}</td>
-            <td>{{ book.section }}</td>
+            <td>{{ book[0] }}</td>
+            <td>{{ book[1] }}</td>
+            <td>{{ book[2] }}</td>
             <td>
               <button
                 type="button"
-                @click="navigate(`/pdf-viewer?book=${book.name}`)"
+                @click="this.$router.push(`/view-file?book=${book[0]}`)"
                 class="btn btn-light"
               >
                 Read Book
@@ -35,7 +39,7 @@
             <td>
               <button
                 type="button"
-                @click="returnBook(book.name)"
+                @click="returnBook(book[0])"
                 class="btn btn-light"
               >
                 Return Book
@@ -53,20 +57,40 @@ import axios from "axios";
 export default {
   data() {
     return {
-      books: [], // Initialize with actual book data
+      books: [],
     };
   },
   methods: {
-    returnBook(bookName) {},
+    returnBook(bookName) {
+      axios
+      .post("http://127.0.0.1:5000/returnBook", {
+        user:localStorage.getItem('username'),
+        book: bookName,
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          this.fetchBooks();
+        }
+      });
+    },
+    fetchBooks(){
+      axios
+      .get("http://127.0.0.1:5000/readBooks", {
+        params: {
+          user: localStorage.getItem("username"),
+        },
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          console.log(response.data);
+          this.books = response.data.books;
+        }
+      });
+    }
   },
   created() {
-    axios.get("http://127.0.0.1:5000/readBooks").then((response) => {
-      if(response.status == 200){
-        console.log(response.data)
-        books = response.data.books
-      }
-    });
-    this.$
+    this.$checkUserRole("user");
+    this.fetchBooks();
   },
 };
 </script>
