@@ -88,7 +88,6 @@ def adminHome():
   return render_template("adminHome.html",name=session.get('user'),userData=userData)
 
 @app.route('/manageSections',methods=['GET','POST','PUT','DELETE'])
-@cache.cached(timeout=60, query_string=True)
 def manageSections():
   if request.method == 'GET':
     try:
@@ -150,7 +149,6 @@ def manageSections():
       return jsonify({"Error":"Internal Server Error"}), 500
 
 @app.route('/manageBooks',methods=['GET','POST','PUT','DELETE'])
-@cache.cached(timeout=60, query_string=True)
 def manageBooks():
   if request.method == 'GET':
     try:
@@ -275,7 +273,6 @@ def searchBooks():
     return jsonify({"Error": "Internal Server Error"}), 500
 
 @app.route("/userBooks",methods=["GET"])
-@cache.cached(timeout=60)
 def userBooks():
   try:
     with sqlite3.connect("library.db") as con:
@@ -362,7 +359,6 @@ def revokeBook():
     return jsonify({"ERR":"Internal Server Error"}), 500
 
 @app.route('/readBooks',methods=["GET"])
-@cache.cached(timeout=120)
 def readBooks():
   try:
     user = request.args.get('user')
@@ -412,7 +408,6 @@ def returnBook():
     return jsonify({"Error":"Internal Server Error"}), 500
 
 @app.route('/getAllUserDetails', methods=["GET"])
-@cache.cached(timeout=300)
 def getAllUserDetails():
   try:
     with sqlite3.connect("library.db") as con:
