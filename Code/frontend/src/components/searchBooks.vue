@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     searchBooks() {
-      axios.post('http://127.0.0.1:5000/searchBooks', this.searchCriteria)
+      axios.get('http://127.0.0.1:5000/searchBooks', {params: this.searchCriteria})
         .then(response => {
         console.log(response)
           this.books = response.data.books;

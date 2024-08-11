@@ -2,12 +2,15 @@ import sqlite3,os,re
 from datetime import datetime, timedelta
 from flask import *
 from flask_cors import CORS
+from flask_caching import Cache
 app = Flask(__name__)
 CORS(app)
 app.secret_key = "asdlkjqwepoirtyiuyzxc,mncvbnbv0912398735=-0`12"
 abs = os.path.abspath(__file__)
 uploadPath = abs[0:-9]+"uploads"
 app.config['UPLOAD_FOLDER'] = uploadPath
+app.config['CACHE_TYPE'] = 'simple'
+cache = Cache(app)
 
 @app.route('/logOut',methods=['GET'])
 def logOut():
@@ -36,6 +39,7 @@ def addUser():
       if(user==None or len(user)==0):
         cur.execute("INSERT INTO user VALUES(?,?,?)",(username,password,int(isAdmin)))
         print("User added successfully !")
+        cache.clear()
         return jsonify({"SUCCESS":"User created successfully!"}), 200
       else:
         return jsonify({"ERROR":"User Already Exists"}), 400
@@ -61,6 +65,7 @@ def loginUser():
       print("User found successfully !")
       session['user'] = username
       session['role'] = role
+      cache.clear()
       if(role == 1):
         return jsonify({"MSG":"Successful Login", "Name":username, "Role": role})
       elif(role==0):
@@ -83,6 +88,7 @@ def adminHome():
   return render_template("adminHome.html",name=session.get('user'),userData=userData)
 
 @app.route('/manageSections',methods=['GET','POST','PUT','DELETE'])
+@cache.cached(timeout=60, query_string=True)
 def manageSections():
   if request.method == 'GET':
     try:
@@ -107,6 +113,7 @@ def manageSections():
         cur.execute("INSERT INTO section(name,creationDate,description) VALUES(?,?,?)",(section_name,currDate,description))
         sections = cur.fetchall()
         print(sections)
+        cache.clear()
         return jsonify({"SUCCESS ":"Section added successfully"}), 200
     except Exception as e:
       print("User data not found in database",str(e))
@@ -122,6 +129,7 @@ def manageSections():
         cur = con.cursor()
         cur.execute("DELETE FROM book WHERE sectionID = ?",(secID,))
         cur.execute("DELETE FROM section WHERE id = ?",(secID,))
+        cache.clear()
         return jsonify({"SUCCESS":"Successfully deleted the entry!"}),200
     except Exception as e:
       print("Unable to delete data: ",str(e))
@@ -136,11 +144,13 @@ def manageSections():
       with sqlite3.connect("library.db") as con:
         cur = con.cursor()
         cur.execute("UPDATE section SET name=?, creationDate=?, description=? WHERE id=?",(section_name,currDate,description,int(section_id)))
+        cache.clear()
         return jsonify({"SUCCESS":"Updated section successfully!"}), 200
     except Exception as e:
       return jsonify({"Error":"Internal Server Error"}), 500
 
 @app.route('/manageBooks',methods=['GET','POST','PUT','DELETE'])
+@cache.cached(timeout=60, query_string=True)
 def manageBooks():
   if request.method == 'GET':
     try:
@@ -185,6 +195,7 @@ def manageBooks():
                         "INSERT INTO book(name, content, author, sectionID, avail) VALUES(?,?,?,?,?)",
                         (filename, file_content, request.form.get('author'), request.form.get('secID'), request.form.get('noOfBooks'))
                     )
+                    cache.clear()
                 return jsonify({"SUCCESS": "Book added successfully"}), 200
             except Exception as e:
                 print("Internal Server Error:", str(e))
@@ -216,6 +227,7 @@ def manageBooks():
             with sqlite3.connect("library.db") as con:
                 cur = con.cursor()
                 cur.execute(query, params)
+                cache.clear()
             return jsonify({"SUCCESS": "Book updated successfully"}), 200
         except Exception as e:
             print("Internal Server Error:", str(e))
@@ -237,6 +249,7 @@ def manageBooks():
                 delete_path = os.path.join(app.config.get('UPLOAD_FOLDER'), filename)
                 if os.path.exists(delete_path):
                     os.remove(delete_path)
+                cache.clear()
             else:
                 return jsonify({"Error": "Book not found"}), 404
         return jsonify({"SUCCESS": "Book deleted successfully"}), 200
@@ -244,9 +257,10 @@ def manageBooks():
         print("Unable to delete data:", str(e))
         return jsonify({"Error": "Internal Server Error"}), 500
   
-@app.route('/searchBooks',methods=['POST'])
+@app.route('/searchBooks',methods=['GET'])
+@cache.cached(timeout=300, query_string=True)
 def searchBooks():
-  data = request.json
+  data = request.args
   print(data)
   try:
     with sqlite3.connect("library.db") as con:
@@ -261,6 +275,7 @@ def searchBooks():
     return jsonify({"Error": "Internal Server Error"}), 500
 
 @app.route("/userBooks",methods=["GET"])
+@cache.cached(timeout=60)
 def userBooks():
   try:
     with sqlite3.connect("library.db") as con:
@@ -291,17 +306,20 @@ def requestBooks():
         data = cur.fetchall()
         print(data)
         if(len(data)>0):
+          cache.clear()
           return jsonify({"msg":"already requested"}), 200
         cur.execute("SELECT id FROM book WHERE name = ?",(bookname,))
         bookID = cur.fetchone()[0]
         print(bookID)
         cur.execute("INSERT INTO borrowed VALUES (?,?,0,?,?)",(uname,bookID,None,None))
+        cache.clear()
         return jsonify({"msg":"Request submitted"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
     return jsonify({"ERR":"Internal Server Error"}), 5500
 
 @app.route('/manageIssueRevoke',methods=["GET"])
+@cache.cached(timeout=120)
 def manageIssueRevoke():
   try:
     with sqlite3.connect("library.db") as con:
@@ -324,6 +342,7 @@ def issueBook():
       revokeDate = currDate + timedelta(days=7)
       cur.execute("UPDATE borrowed SET issueDate = ?, returnDate = ?, status = 1 WHERE uname = ? AND bookid = ?",(currDate,revokeDate,request.json.get('user'),request.json.get('bookid')))
       cur.execute("UPDATE book SET avail = avail - 1 WHERE id = ?",(request.json.get('bookid'),))
+      cache.clear()
       return jsonify({"MSG":"Book issued successfully"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
@@ -336,12 +355,14 @@ def revokeBook():
       cur = con.cursor()
       cur.execute("DELETE FROM borrowed WHERE bookid = ? AND uname = ?",(request.json.get('bookid'),request.json.get('user')))
       cur.execute("UPDATE book SET avail = avail + 1 WHERE id = ?",(request.json.get('bookid'),))
+      cache.clear()
       return jsonify({"MSG":"Book revoked successfully"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
     return jsonify({"ERR":"Internal Server Error"}), 500
 
 @app.route('/readBooks',methods=["GET"])
+@cache.cached(timeout=120)
 def readBooks():
   try:
     user = request.args.get('user')
@@ -384,12 +405,14 @@ def returnBook():
       cur = con.cursor()
       cur.execute("DELETE FROM borrowed WHERE bookid = (SELECT id FROM book WHERE name = ?) AND uname = ?",(request.json.get('book'), request.json.get('user')))
       cur.execute("UPDATE book SET avail = avail + 1 WHERE name = ?",(request.json.get('book'),))
+      cache.clear()
       return jsonify({"MSG":"Successfully returned the book!"}), 200
   except Exception as e:
     print("Internal Server Error: ",e)
     return jsonify({"Error":"Internal Server Error"}), 500
 
 @app.route('/getAllUserDetails', methods=["GET"])
+@cache.cached(timeout=300)
 def getAllUserDetails():
   try:
     with sqlite3.connect("library.db") as con:
